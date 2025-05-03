@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Question, StudentAnswer, EvaluationResult } from "@/types";
 import { evaluateAnswer } from "@/utils/evaluationService";
 import { toast } from "@/components/ui/sonner";
+import { PaperclipIcon, UploadIcon, FileTextIcon } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface EvaluationFormProps {
   studentAnswerText: string;
@@ -23,10 +25,14 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
   const [question, setQuestion] = useState<Partial<Question>>({
     text: '',
     totalMarks: 10,
-    modelAnswer: ''
+    modelAnswer: '',
+    questionPaper: ''
   });
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [studentAnswer, setStudentAnswer] = useState<string>(studentAnswerText);
+  const [questionPaperImageUrl, setQuestionPaperImageUrl] = useState<string>('');
+  const [showQuestionPaper, setShowQuestionPaper] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -38,6 +44,24 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
 
   const handleStudentAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setStudentAnswer(e.target.value);
+  };
+
+  const handleQuestionPaperUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setQuestionPaperImageUrl(event.target.result.toString());
+        toast.success("Question paper uploaded successfully!");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   const handleEvaluate = async (e: React.FormEvent) => {
@@ -73,6 +97,68 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
       <form onSubmit={handleEvaluate} className="p-4">
         <div className="space-y-4">
           <h2 className="font-semibold text-lg text-app-blue-900">Evaluation Details</h2>
+          
+          <Collapsible open={showQuestionPaper} onOpenChange={setShowQuestionPaper}>
+            <div className="flex justify-between items-center mb-2">
+              <CollapsibleTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline" 
+                  className="flex items-center gap-2 text-app-blue-600"
+                >
+                  <FileTextIcon size={16} />
+                  {showQuestionPaper ? "Hide Question Paper" : "Add Question Paper"}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            
+            <CollapsibleContent className="space-y-4 border rounded-md p-4 bg-app-blue-50/50">
+              <div className="space-y-2">
+                <Label htmlFor="question-paper">Question Paper Text</Label>
+                <Textarea
+                  id="question-paper"
+                  name="questionPaper"
+                  value={question.questionPaper || ''}
+                  onChange={handleInputChange}
+                  placeholder="Enter the question paper text..."
+                  className="min-h-[80px]"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Question Paper Attachment</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleQuestionPaperUpload}
+                  />
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    className="flex gap-2"
+                    onClick={triggerFileInput}
+                  >
+                    <PaperclipIcon size={16} />
+                    Upload Question Paper
+                  </Button>
+                  
+                  {questionPaperImageUrl && (
+                    <Button 
+                      type="button" 
+                      variant="link" 
+                      className="text-app-blue-600 p-0 h-auto"
+                      onClick={() => window.open(questionPaperImageUrl, '_blank')}
+                    >
+                      View Uploaded Question Paper
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
           
           <div className="space-y-2">
             <Label htmlFor="question-text">Question Text</Label>

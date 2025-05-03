@@ -4,6 +4,8 @@ export interface Question {
   text: string;
   totalMarks: number;
   modelAnswer: string;
+  questionPaper?: string; // Text content of the question paper
+  questionPaperImageUrl?: string; // URL to the question paper image if uploaded
 }
 
 export interface StudentAnswer {
