@@ -22,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </header>
-      <main className="flex-1 container py-8">
+      <main className="flex-1 container py-8 animate-fade-in">
         {children}
       </main>
       <footer className="border-t py-4 bg-white">

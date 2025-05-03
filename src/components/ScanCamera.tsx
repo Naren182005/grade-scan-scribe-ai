@@ -18,6 +18,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
   const [isCaptured, setIsCaptured] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [capturedImageUrl, setCapturedImageUrl] = useState<string>('');
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -29,12 +30,22 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
 
   const startCamera = async () => {
     try {
+      setCameraError(null);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' }
       });
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          if (videoRef.current) {
+            videoRef.current.play().catch(err => {
+              console.error("Error playing video:", err);
+              toast.error("Failed to start camera stream");
+              setCameraError("Failed to start camera stream");
+            });
+          }
+        };
       }
       
       setStream(mediaStream);
@@ -42,7 +53,8 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
       toast.success("Camera started");
     } catch (error) {
       console.error("Error accessing camera:", error);
-      toast.error("Failed to access camera");
+      toast.error("Failed to access camera. Please check camera permissions.");
+      setCameraError("Failed to access camera. Please ensure you've granted camera permissions.");
     }
   };
 
@@ -73,25 +85,26 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
     
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Convert to image URL
-    const imageUrl = canvas.toDataURL('image/png');
-    setCapturedImageUrl(imageUrl);
-    setIsCaptured(true);
-    
-    // Process the image with OCR
-    setIsProcessing(true);
     try {
+      // Convert to image URL
+      const imageUrl = canvas.toDataURL('image/png');
+      setCapturedImageUrl(imageUrl);
+      setIsCaptured(true);
+      
+      // Process the image with OCR
+      setIsProcessing(true);
       const extractedText = await extractTextFromImage(imageUrl);
       onCapture(extractedText, imageUrl);
       toast.success("Answer sheet scanned successfully!");
     } catch (error) {
       console.error("Error processing image:", error);
       toast.error("Error processing image");
+    } finally {
+      setIsProcessing(false);
+      
+      // Stop the camera after capture
+      stopCamera();
     }
-    setIsProcessing(false);
-    
-    // Stop the camera after capture
-    stopCamera();
   };
 
   const retakePhoto = () => {
@@ -101,7 +114,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden shadow-lg border-app-teal-100">
       <div className="p-4 bg-app-blue-50">
         <div className="flex items-center gap-2 mb-2">
           <ScanText className="h-5 w-5 text-app-teal-600" />
@@ -111,7 +124,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
           Position the answer sheet within the frame and capture a clear image
         </p>
         
-        <div className="relative aspect-[4/3] bg-black rounded-lg overflow-hidden">
+        <div className="relative aspect-[4/3] bg-black rounded-lg overflow-hidden shadow-inner">
           {isActive && !isCaptured && (
             <>
               <div className="scan-line animate-scan"></div>
@@ -133,8 +146,13 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
               className="w-full h-full object-contain"
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-app-blue-900 text-white">
-              <CameraOff size={48} className="opacity-50" />
+            <div className="flex flex-col items-center justify-center h-full bg-app-blue-900 text-white p-6">
+              <CameraOff size={48} className="opacity-50 mb-4" />
+              {cameraError ? (
+                <p className="text-center text-sm opacity-80">{cameraError}</p>
+              ) : (
+                <p className="text-center text-sm opacity-80">Click "Start Camera" to begin scanning</p>
+              )}
             </div>
           )}
           
@@ -145,7 +163,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
           {isActive ? (
             <Button 
               onClick={captureImage} 
-              className="bg-app-teal-500 hover:bg-app-teal-600"
+              className="bg-app-teal-500 hover:bg-app-teal-600 transition-all shadow-md"
             >
               <Camera className="mr-2 h-4 w-4" />
               Capture
@@ -155,6 +173,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
               onClick={retakePhoto}
               variant="outline"
               disabled={isProcessing}
+              className="border-app-teal-300 hover:bg-app-teal-50"
             >
               <Camera className="mr-2 h-4 w-4" />
               Retake
@@ -162,7 +181,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
           ) : (
             <Button 
               onClick={startCamera} 
-              className="bg-app-blue-500 hover:bg-app-blue-600"
+              className="bg-app-blue-500 hover:bg-app-blue-600 transition-all shadow-md"
             >
               <Camera className="mr-2 h-4 w-4" />
               Start Camera
@@ -173,6 +192,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
             <Button 
               onClick={stopCamera} 
               variant="outline"
+              className="border-app-blue-300 hover:bg-app-blue-50"
             >
               <CameraOff className="mr-2 h-4 w-4" />
               Cancel

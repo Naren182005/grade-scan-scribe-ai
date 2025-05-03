@@ -99,6 +99,7 @@
   .scan-line {
     @apply absolute left-0 w-full h-1 bg-app-teal-400 bg-opacity-70 shadow-lg shadow-app-teal-300;
     z-index: 10;
+    animation: scan 2s cubic-bezier(0.3, 0, 0.7, 1) infinite;
   }
 
   .scan-overlay {
@@ -114,6 +115,12 @@
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='black'/%3E%3Crect width='80%25' height='80%25' fill='white' x='10%25' y='10%25' rx='8' ry='8'/%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='black'/%3E%3Crect width='80%25' height='80%25' fill='white' x='10%25' y='10%25' rx='8' ry='8'/%3E%3C/svg%3E");
   }
+}
+
+@keyframes scan {
+  0% { transform: translateY(0%); opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0.3; }
 }
 
 @keyframes fadeIn {
@@ -133,5 +140,9 @@
   
   .animate-slide-in {
     animation: slideIn 0.4s ease-out forwards;
+  }
+
+  .animate-scan {
+    animation: scan 2s cubic-bezier(0.3, 0, 0.7, 1) infinite;
   }
 }
