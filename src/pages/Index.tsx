@@ -1,13 +1,138 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import Layout from '@/components/Layout';
+import ScanCamera from '@/components/ScanCamera';
+import EvaluationForm from '@/components/EvaluationForm';
+import ResultsDisplay from '@/components/ResultsDisplay';
+import { AppStep, EvaluationResult } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScanText, FileText, CheckCircle } from 'lucide-react';
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+  const [currentStep, setCurrentStep] = useState<AppStep>('scan');
+  const [capturedText, setCapturedText] = useState('');
+  const [capturedImageUrl, setCapturedImageUrl] = useState('');
+  const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
+  const [totalMarks, setTotalMarks] = useState(10);
+
+  const handleCapture = (text: string, imageUrl: string) => {
+    setCapturedText(text);
+    setCapturedImageUrl(imageUrl);
+    setCurrentStep('evaluate');
+  };
+
+  const handleEvaluationComplete = (result: EvaluationResult) => {
+    setEvaluationResult(result);
+    setCurrentStep('results');
+  };
+
+  const resetApp = () => {
+    setCapturedText('');
+    setCapturedImageUrl('');
+    setEvaluationResult(null);
+    setCurrentStep('scan');
+  };
+
+  const renderStepIndicator = () => {
+    return (
+      <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center">
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+            currentStep === 'scan' ? 'bg-app-blue-500 text-white' : 'bg-app-blue-100 text-app-blue-900'
+          }`}>
+            <ScanText size={16} />
+          </div>
+          <div className={`h-1 w-12 ${
+            currentStep === 'scan' ? 'bg-muted' : 'bg-app-blue-500'
+          }`}></div>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+            currentStep === 'evaluate' ? 'bg-app-blue-500 text-white' : (
+              currentStep === 'results' ? 'bg-app-blue-500 text-white' : 'bg-app-blue-100 text-app-blue-900'
+            )
+          }`}>
+            <FileText size={16} />
+          </div>
+          <div className={`h-1 w-12 ${
+            currentStep === 'results' ? 'bg-app-blue-500' : 'bg-muted'
+          }`}></div>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+            currentStep === 'results' ? 'bg-app-blue-500 text-white' : 'bg-app-blue-100 text-app-blue-900'
+          }`}>
+            <CheckCircle size={16} />
+          </div>
+        </div>
       </div>
-    </div>
+    );
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 'scan':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="md:col-span-2">
+              <ScanCamera onCapture={handleCapture} />
+            </div>
+            <Card className="col-span-1 md:col-span-2">
+              <CardContent className="p-6">
+                <h2 className="text-lg font-semibold text-app-blue-800 mb-2">
+                  How it works:
+                </h2>
+                <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                  <li>Scan a student's answer sheet using your device camera</li>
+                  <li>Enter the question and model answer details</li>
+                  <li>Our AI will evaluate the answer and award marks</li>
+                  <li>Review the detailed breakdown of points covered and missed</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </div>
+        );
+        
+      case 'evaluate':
+        return (
+          <div className="grid grid-cols-1 gap-8">
+            <EvaluationForm
+              studentAnswerText={capturedText}
+              imageUrl={capturedImageUrl}
+              onEvaluationComplete={handleEvaluationComplete}
+            />
+          </div>
+        );
+        
+      case 'results':
+        return (
+          <div className="grid grid-cols-1 gap-8">
+            {evaluationResult && (
+              <ResultsDisplay
+                result={evaluationResult}
+                totalMarks={totalMarks}
+                onReset={resetApp}
+              />
+            )}
+          </div>
+        );
+        
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl md:text-3xl font-bold text-app-blue-900 text-center mb-4">
+          AI-Powered Exam Evaluation
+        </h1>
+        <p className="text-center text-muted-foreground mb-8">
+          Scan student answer sheets, compare against model answers, and get instant AI evaluation
+        </p>
+        
+        {renderStepIndicator()}
+        {renderStepContent()}
+      </div>
+    </Layout>
   );
 };
 
