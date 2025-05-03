@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Question, StudentAnswer, EvaluationResult } from "@/types";
 import { evaluateAnswer } from "@/utils/evaluationService";
 import { toast } from "@/components/ui/sonner";
-import { PaperclipIcon, UploadIcon, FileTextIcon } from "lucide-react";
+import { PaperclipIcon, UploadIcon, FileTextIcon, BookOpenIcon, ClipboardCheckIcon } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface EvaluationFormProps {
@@ -93,40 +93,43 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
   };
 
   return (
-    <Card className="overflow-hidden">
-      <form onSubmit={handleEvaluate} className="p-4">
-        <div className="space-y-4">
-          <h2 className="font-semibold text-lg text-app-blue-900">Evaluation Details</h2>
+    <Card className="overflow-hidden shadow-lg border-app-teal-100">
+      <form onSubmit={handleEvaluate} className="p-6">
+        <div className="space-y-5">
+          <h2 className="font-semibold text-xl text-app-blue-900 mb-2 flex items-center">
+            <ClipboardCheckIcon size={20} className="mr-2 text-app-teal-600" />
+            Evaluation Details
+          </h2>
           
-          <Collapsible open={showQuestionPaper} onOpenChange={setShowQuestionPaper}>
+          <Collapsible open={showQuestionPaper} onOpenChange={setShowQuestionPaper} className="transition-all duration-300">
             <div className="flex justify-between items-center mb-2">
               <CollapsibleTrigger asChild>
                 <Button
                   type="button"
                   variant="outline" 
-                  className="flex items-center gap-2 text-app-blue-600"
+                  className="flex items-center gap-2 text-app-blue-700 hover:bg-app-blue-50 border-app-blue-200 shadow-sm"
                 >
-                  <FileTextIcon size={16} />
+                  <BookOpenIcon size={16} />
                   {showQuestionPaper ? "Hide Question Paper" : "Add Question Paper"}
                 </Button>
               </CollapsibleTrigger>
             </div>
             
-            <CollapsibleContent className="space-y-4 border rounded-md p-4 bg-app-blue-50/50">
+            <CollapsibleContent className="space-y-4 border rounded-md p-5 bg-app-blue-50/50 animate-fade-in">
               <div className="space-y-2">
-                <Label htmlFor="question-paper">Question Paper Text</Label>
+                <Label htmlFor="question-paper" className="text-app-blue-800">Question Paper Text</Label>
                 <Textarea
                   id="question-paper"
                   name="questionPaper"
                   value={question.questionPaper || ''}
                   onChange={handleInputChange}
                   placeholder="Enter the question paper text..."
-                  className="min-h-[80px]"
+                  className="min-h-[80px] focus:border-app-teal-300"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label>Question Paper Attachment</Label>
+                <Label className="text-app-blue-800">Question Paper Attachment</Label>
                 <div className="flex gap-2">
                   <input
                     type="file"
@@ -138,7 +141,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
                   <Button 
                     type="button"
                     variant="outline"
-                    className="flex gap-2"
+                    className="flex gap-2 border-app-blue-200 hover:border-app-blue-300 hover:bg-app-blue-50"
                     onClick={triggerFileInput}
                   >
                     <PaperclipIcon size={16} />
@@ -149,7 +152,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
                     <Button 
                       type="button" 
                       variant="link" 
-                      className="text-app-blue-600 p-0 h-auto"
+                      className="text-app-teal-600 hover:text-app-teal-700 p-0 h-auto"
                       onClick={() => window.open(questionPaperImageUrl, '_blank')}
                     >
                       View Uploaded Question Paper
@@ -161,20 +164,20 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
           </Collapsible>
           
           <div className="space-y-2">
-            <Label htmlFor="question-text">Question Text</Label>
+            <Label htmlFor="question-text" className="text-app-blue-800">Question Text</Label>
             <Textarea
               id="question-text"
               name="text"
               value={question.text}
               onChange={handleInputChange}
               placeholder="Enter the question..."
-              className="min-h-[80px]"
+              className="min-h-[80px] focus:border-app-teal-300"
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="total-marks">Total Marks</Label>
+            <Label htmlFor="total-marks" className="text-app-blue-800">Total Marks</Label>
             <Input
               id="total-marks"
               name="totalMarks"
@@ -183,30 +186,31 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
               onChange={handleInputChange}
               min="1"
               max="100"
+              className="focus:border-app-teal-300"
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="model-answer">Model Answer</Label>
+            <Label htmlFor="model-answer" className="text-app-blue-800">Model Answer</Label>
             <Textarea
               id="model-answer"
               name="modelAnswer"
               value={question.modelAnswer}
               onChange={handleInputChange}
               placeholder="Enter the model answer..."
-              className="min-h-[120px]"
+              className="min-h-[120px] focus:border-app-teal-300"
               required
             />
           </div>
           
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label htmlFor="student-answer">Student's Answer (Scanned)</Label>
+              <Label htmlFor="student-answer" className="text-app-blue-800">Student's Answer (Scanned)</Label>
               <Button 
                 type="button" 
                 variant="link" 
-                className="text-app-blue-600 p-0 h-auto"
+                className="text-app-teal-600 hover:text-app-teal-700 p-0 h-auto"
                 onClick={() => window.open(imageUrl, '_blank')}
               >
                 View Image
@@ -217,16 +221,19 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
               value={studentAnswer}
               onChange={handleStudentAnswerChange}
               placeholder="Extracted text from the scanned answer..."
-              className="min-h-[150px]"
+              className="min-h-[150px] focus:border-app-teal-300"
             />
           </div>
           
           <Button 
             type="submit" 
-            className="w-full bg-app-teal-500 hover:bg-app-teal-600"
+            className="w-full bg-app-teal-500 hover:bg-app-teal-600 transition-all duration-300 shadow-md"
             disabled={isEvaluating}
           >
-            {isEvaluating ? "Evaluating..." : "Evaluate Answer"}
+            {isEvaluating ? 
+              "Evaluating..." : 
+              <span className="flex items-center gap-2"><ClipboardCheckIcon size={18} /> Evaluate Answer</span>
+            }
           </Button>
         </div>
       </form>
