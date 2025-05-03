@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -96,6 +95,13 @@
     @apply bg-background text-foreground font-sans;
   }
 
+  /* Improved button focus styles for accessibility */
+  button, 
+  [role="button"],
+  a {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-all;
+  }
+
   .scan-line {
     @apply absolute left-0 w-full h-1 bg-app-teal-400 bg-opacity-70 shadow-lg shadow-app-teal-300;
     z-index: 10;
@@ -144,5 +150,13 @@
 
   .animate-scan {
     animation: scan 2s cubic-bezier(0.3, 0, 0.7, 1) infinite;
+  }
+
+  /* Enhanced button accessibility classes */
+  .btn-accessible {
+    @apply relative overflow-hidden inline-flex items-center justify-center px-4 py-2 
+      rounded-md transition-all duration-200 
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 
+      focus-visible:ring-app-teal-500 active:scale-95;
   }
 }

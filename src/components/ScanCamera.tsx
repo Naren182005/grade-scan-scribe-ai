@@ -163,7 +163,8 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
           {isActive ? (
             <Button 
               onClick={captureImage} 
-              className="bg-app-teal-500 hover:bg-app-teal-600 transition-all shadow-md"
+              className="bg-app-teal-500 hover:bg-app-teal-600 transition-all shadow-md focus:ring-2 focus:ring-app-teal-300 focus:ring-offset-2"
+              aria-label="Capture image"
             >
               <Camera className="mr-2 h-4 w-4" />
               Capture
@@ -173,7 +174,8 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
               onClick={retakePhoto}
               variant="outline"
               disabled={isProcessing}
-              className="border-app-teal-300 hover:bg-app-teal-50"
+              className="border-app-teal-300 hover:bg-app-teal-50 focus:ring-2 focus:ring-app-teal-300 focus:ring-offset-2"
+              aria-label="Retake photo"
             >
               <Camera className="mr-2 h-4 w-4" />
               Retake
@@ -181,7 +183,8 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
           ) : (
             <Button 
               onClick={startCamera} 
-              className="bg-app-blue-500 hover:bg-app-blue-600 transition-all shadow-md"
+              className="bg-app-blue-500 hover:bg-app-blue-600 transition-all shadow-md focus:ring-2 focus:ring-app-blue-300 focus:ring-offset-2"
+              aria-label="Start camera"
             >
               <Camera className="mr-2 h-4 w-4" />
               Start Camera
@@ -192,7 +195,8 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
             <Button 
               onClick={stopCamera} 
               variant="outline"
-              className="border-app-blue-300 hover:bg-app-blue-50"
+              className="border-app-blue-300 hover:bg-app-blue-50 focus:ring-2 focus:ring-app-blue-300 focus:ring-offset-2"
+              aria-label="Cancel camera"
             >
               <CameraOff className="mr-2 h-4 w-4" />
               Cancel
