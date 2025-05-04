@@ -4,10 +4,12 @@ import Layout from '@/components/Layout';
 import ScanCamera from '@/components/ScanCamera';
 import EvaluationForm from '@/components/EvaluationForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
+import EvaluationDemo from '@/components/EvaluationDemo';
 import { AppStep, EvaluationResult } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScanText, FileText, CheckCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<AppStep>('scan');
@@ -70,25 +72,38 @@ const Index = () => {
     switch (currentStep) {
       case 'scan':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="md:col-span-2">
-              <ScanCamera onCapture={handleCapture} />
-            </div>
-            <Card className="col-span-1 md:col-span-2 border-app-teal-100 shadow-md">
-              <CardContent className="p-6">
-                <h2 className="text-lg font-semibold text-app-blue-800 mb-4 flex items-center">
-                  <FileText size={20} className="mr-2 text-app-teal-600" />
-                  How it works
-                </h2>
-                <ol className="list-decimal list-inside space-y-3 text-muted-foreground">
-                  <li className="pl-2">Scan a student's answer sheet using your device camera</li>
-                  <li className="pl-2">Enter the question and model answer details</li>
-                  <li className="pl-2">Our AI will evaluate the answer and award marks</li>
-                  <li className="pl-2">Review the detailed breakdown of points covered and missed</li>
-                </ol>
-              </CardContent>
-            </Card>
-          </div>
+          <Tabs defaultValue="camera" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="camera">Scan Answer Sheet</TabsTrigger>
+              <TabsTrigger value="demo">AI Evaluation Demo</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="camera">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="md:col-span-2">
+                  <ScanCamera onCapture={handleCapture} />
+                </div>
+                <Card className="col-span-1 md:col-span-2 border-app-teal-100 shadow-md">
+                  <CardContent className="p-6">
+                    <h2 className="text-lg font-semibold text-app-blue-800 mb-4 flex items-center">
+                      <FileText size={20} className="mr-2 text-app-teal-600" />
+                      How it works
+                    </h2>
+                    <ol className="list-decimal list-inside space-y-3 text-muted-foreground">
+                      <li className="pl-2">Scan a student's answer sheet using your device camera</li>
+                      <li className="pl-2">Enter the question and model answer details</li>
+                      <li className="pl-2">Our AI will evaluate the answer and award marks</li>
+                      <li className="pl-2">Review the detailed breakdown of points covered and missed</li>
+                    </ol>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="demo">
+              <EvaluationDemo />
+            </TabsContent>
+          </Tabs>
         );
         
       case 'evaluate':
