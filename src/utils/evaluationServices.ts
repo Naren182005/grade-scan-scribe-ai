@@ -11,9 +11,6 @@ export const evaluateAnswer = async (
   // In a real implementation, this would call an AI service API
   console.log("Evaluating answer for question:", questionText);
   
-  // For demo purposes, we process the input and return structured results
-  // This simulates what an actual AI service would return
-  
   // Basic analysis - identify key phrases from model answer that are present in student answer
   const modelKeyPhrases = extractKeyPhrases(modelAnswer);
   const coveredPoints: string[] = [];
