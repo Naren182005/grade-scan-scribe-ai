@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { EvaluationResult } from "@/types";
 import { evaluateAnswer } from "@/utils/evaluationServices";
 import { toast } from "@/components/ui/sonner";
-import { PaperclipIcon, FileTextIcon, BookOpenIcon, ClipboardCheckIcon } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { FileTextIcon, ClipboardCheckIcon } from "lucide-react";
+import QuestionTypeToggle from "./evaluation/QuestionTypeToggle";
+import QuestionPaperSection from "./evaluation/QuestionPaperSection";
+import StudentAnswerSection from "./evaluation/StudentAnswerSection";
 
 interface EvaluationFormProps {
   studentAnswerText: string;
@@ -34,7 +36,6 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
   const [studentAnswer, setStudentAnswer] = useState<string>(studentAnswerText);
   const [questionPaperImageUrl, setQuestionPaperImageUrl] = useState<string>('');
   const [showQuestionPaper, setShowQuestionPaper] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -46,24 +47,6 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
 
   const handleStudentAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setStudentAnswer(e.target.value);
-  };
-
-  const handleQuestionPaperUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setQuestionPaperImageUrl(event.target.result.toString());
-        toast.success("Question paper uploaded successfully!");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-  
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
   };
 
   const handleEvaluate = async (e: React.FormEvent) => {
@@ -103,89 +86,19 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
             Essay Question Evaluation
           </h2>
           
-          <div className="flex justify-start items-center mb-4">
-            <div className="flex items-center space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onQuestionTypeChange('mcq')}
-              >
-                MCQ Question
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="bg-app-teal-500 text-white hover:bg-app-teal-600"
-                onClick={() => onQuestionTypeChange('essay')}
-              >
-                Essay Question
-              </Button>
-            </div>
-          </div>
+          <QuestionTypeToggle 
+            onQuestionTypeChange={onQuestionTypeChange}
+            currentType="essay"
+          />
           
-          <Collapsible open={showQuestionPaper} onOpenChange={setShowQuestionPaper} className="transition-all duration-300">
-            <div className="flex justify-between items-center mb-2">
-              <CollapsibleTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline" 
-                  className="flex items-center gap-2 text-app-blue-700 hover:bg-app-blue-50 border-app-blue-200 shadow-sm"
-                >
-                  <BookOpenIcon size={16} />
-                  {showQuestionPaper ? "Hide Question Paper" : "Add Question Paper"}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            
-            <CollapsibleContent className="space-y-4 border rounded-md p-5 bg-app-blue-50/50 animate-fade-in">
-              <div className="space-y-2">
-                <Label htmlFor="question-paper" className="text-app-blue-800">Question Paper Text</Label>
-                <Textarea
-                  id="question-paper"
-                  name="questionPaper"
-                  value={question.questionPaper}
-                  onChange={handleInputChange}
-                  placeholder="Enter the question paper text..."
-                  className="min-h-[80px] focus:border-app-teal-300"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-app-blue-800">Question Paper Attachment</Label>
-                <div className="flex gap-2">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleQuestionPaperUpload}
-                  />
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    className="flex gap-2 border-app-blue-200 hover:border-app-blue-300 hover:bg-app-blue-50"
-                    onClick={triggerFileInput}
-                  >
-                    <PaperclipIcon size={16} />
-                    Upload Question Paper
-                  </Button>
-                  
-                  {questionPaperImageUrl && (
-                    <Button 
-                      type="button" 
-                      variant="link" 
-                      className="text-app-teal-600 hover:text-app-teal-700 p-0 h-auto"
-                      onClick={() => window.open(questionPaperImageUrl, '_blank')}
-                    >
-                      View Uploaded Question Paper
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          <QuestionPaperSection
+            questionPaper={question.questionPaper}
+            setQuestionPaper={(value) => setQuestion(prev => ({ ...prev, questionPaper: value }))}
+            questionPaperImageUrl={questionPaperImageUrl}
+            setQuestionPaperImageUrl={setQuestionPaperImageUrl}
+            showQuestionPaper={showQuestionPaper}
+            setShowQuestionPaper={setShowQuestionPaper}
+          />
           
           <div className="space-y-2">
             <Label htmlFor="question-text" className="text-app-blue-800">Question Text</Label>
@@ -228,26 +141,11 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
             />
           </div>
           
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="student-answer" className="text-app-blue-800">Student's Answer (Scanned)</Label>
-              <Button 
-                type="button" 
-                variant="link" 
-                className="text-app-teal-600 hover:text-app-teal-700 p-0 h-auto"
-                onClick={() => window.open(imageUrl, '_blank')}
-              >
-                View Image
-              </Button>
-            </div>
-            <Textarea
-              id="student-answer"
-              value={studentAnswer}
-              onChange={handleStudentAnswerChange}
-              placeholder="Extracted text from the scanned answer..."
-              className="min-h-[150px] focus:border-app-teal-300"
-            />
-          </div>
+          <StudentAnswerSection
+            studentAnswer={studentAnswer}
+            onChange={handleStudentAnswerChange}
+            imageUrl={imageUrl}
+          />
           
           <Button 
             type="submit" 

@@ -1,10 +1,11 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, CameraOff, ScanText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ScanText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { extractTextFromImage } from "@/utils/evaluationServices";
+import CameraView from "./camera/CameraView";
+import CameraControls from "./camera/CameraControls";
 
 interface ScanCameraProps {
   onCapture: (text: string, imageUrl: string) => void;
@@ -130,85 +131,25 @@ const ScanCamera: React.FC<ScanCameraProps> = ({
           {description}
         </p>
         
-        <div className="relative aspect-[4/3] bg-black rounded-lg overflow-hidden shadow-inner">
-          {isActive && !isCaptured && (
-            <>
-              <div className="scan-line animate-scan"></div>
-              <div className="scan-overlay"></div>
-            </>
-          )}
-          
-          {isActive && !isCaptured ? (
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover camera-cutout"
-            />
-          ) : isCaptured ? (
-            <img 
-              src={capturedImageUrl} 
-              alt="Captured image" 
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full bg-app-blue-900 text-white p-6">
-              <CameraOff size={48} className="opacity-50 mb-4" />
-              {cameraError ? (
-                <p className="text-center text-sm opacity-80">{cameraError}</p>
-              ) : (
-                <p className="text-center text-sm opacity-80">Click "Start Camera" to begin scanning</p>
-              )}
-            </div>
-          )}
-          
-          <canvas ref={canvasRef} className="hidden" />
-        </div>
+        <CameraView
+          isActive={isActive}
+          isCaptured={isCaptured}
+          capturedImageUrl={capturedImageUrl}
+          cameraError={cameraError}
+          videoRef={videoRef}
+        />
         
-        <div className="flex gap-2 mt-4 justify-center">
-          {isActive ? (
-            <Button 
-              onClick={captureImage} 
-              className="bg-app-teal-500 hover:bg-app-teal-600 transition-all shadow-md focus:ring-2 focus:ring-app-teal-300 focus:ring-offset-2"
-              aria-label="Capture image"
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Capture
-            </Button>
-          ) : isCaptured ? (
-            <Button 
-              onClick={retakePhoto}
-              variant="outline"
-              disabled={isProcessing}
-              className="border-app-teal-300 hover:bg-app-teal-50 focus:ring-2 focus:ring-app-teal-300 focus:ring-offset-2"
-              aria-label="Retake photo"
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Retake
-            </Button>
-          ) : (
-            <Button 
-              onClick={startCamera} 
-              className="bg-app-blue-500 hover:bg-app-blue-600 transition-all shadow-md focus:ring-2 focus:ring-app-blue-300 focus:ring-offset-2"
-              aria-label="Start camera"
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Start Camera
-            </Button>
-          )}
-          
-          {isActive && (
-            <Button 
-              onClick={stopCamera} 
-              variant="outline"
-              className="border-app-blue-300 hover:bg-app-blue-50 focus:ring-2 focus:ring-app-blue-300 focus:ring-offset-2"
-              aria-label="Cancel camera"
-            >
-              <CameraOff className="mr-2 h-4 w-4" />
-              Cancel
-            </Button>
-          )}
-        </div>
+        <canvas ref={canvasRef} className="hidden" />
+        
+        <CameraControls
+          isActive={isActive}
+          isCaptured={isCaptured}
+          isProcessing={isProcessing}
+          onStartCamera={startCamera}
+          onStopCamera={stopCamera}
+          onCaptureImage={captureImage}
+          onRetakePhoto={retakePhoto}
+        />
       </div>
     </Card>
   );
