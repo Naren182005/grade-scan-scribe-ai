@@ -1,7 +1,7 @@
 
 import { EvaluationResult } from "@/types";
 
-// Exam answer evaluation function
+// Exam answer evaluation function for essay questions
 export const evaluateAnswer = async (
   questionText: string,
   totalMarks: number,
@@ -34,6 +34,44 @@ export const evaluateAnswer = async (
     keyPointsMissing: missingPoints,
     evaluationReason: generateEvaluationReason(coverage, totalMarks, marksAwarded)
   };
+};
+
+// MCQ evaluation function
+export const evaluateMCQAnswer = async (
+  questionText: string,
+  totalMarks: number,
+  correctOption: number,
+  selectedOption: number
+): Promise<EvaluationResult> => {
+  console.log("Evaluating MCQ answer for question:", questionText);
+  
+  const isCorrect = correctOption === selectedOption;
+  const marksAwarded = isCorrect ? totalMarks : 0;
+  
+  return {
+    marksAwarded,
+    keyPointsCovered: isCorrect ? ["Correct option selected"] : [],
+    keyPointsMissing: isCorrect ? [] : ["Correct option was not selected"],
+    evaluationReason: isCorrect 
+      ? `Correct answer selected. Full marks awarded: ${marksAwarded}/${totalMarks}.`
+      : `Incorrect answer selected. Option ${selectedOption + 1} was chosen, but the correct answer was option ${correctOption + 1}. 0/${totalMarks} marks awarded.`,
+    isCorrect,
+    correctOption
+  };
+};
+
+// Generate MCQ options for a question
+export const generateMCQOptions = async (questionText: string): Promise<string[]> => {
+  console.log("Generating MCQ options for:", questionText);
+  
+  // In a real implementation, this would call an AI service
+  // For demo purposes, we're generating mock options
+  return [
+    "Option A - This would be the first potential answer",
+    "Option B - This would be the second potential answer",
+    "Option C - This would be the third potential answer",
+    "Option D - This would be the fourth potential answer"
+  ];
 };
 
 // Helper function to extract key phrases from text
@@ -134,4 +172,16 @@ export const generateHandwritingAnalysisJSON = (
     neatness_score: neatnessScore.toString(),
     reason: reason
   }, null, 2);
+};
+
+// Function to extract text from images using OCR
+export const extractTextFromImage = async (imageUrl: string): Promise<string> => {
+  // Mock implementation - in production this would call an OCR service
+  console.log("Extracting text from image:", imageUrl);
+  
+  // Simulate processing delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // Return mock extracted text
+  return "This is extracted text from the student's answer sheet that would be processed by an OCR service in production.";
 };

@@ -5,24 +5,26 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Question, StudentAnswer, EvaluationResult } from "@/types";
-import { evaluateAnswer } from "@/utils/evaluationService";
+import { EvaluationResult } from "@/types";
+import { evaluateAnswer } from "@/utils/evaluationServices";
 import { toast } from "@/components/ui/sonner";
-import { PaperclipIcon, UploadIcon, FileTextIcon, BookOpenIcon, ClipboardCheckIcon } from "lucide-react";
+import { PaperclipIcon, FileTextIcon, BookOpenIcon, ClipboardCheckIcon } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface EvaluationFormProps {
   studentAnswerText: string;
   imageUrl: string;
   onEvaluationComplete: (result: EvaluationResult) => void;
+  onQuestionTypeChange: (type: 'essay' | 'mcq') => void;
 }
 
 const EvaluationForm: React.FC<EvaluationFormProps> = ({
   studentAnswerText,
   imageUrl,
-  onEvaluationComplete
+  onEvaluationComplete,
+  onQuestionTypeChange
 }) => {
-  const [question, setQuestion] = useState<Partial<Question>>({
+  const [question, setQuestion] = useState({
     text: '',
     totalMarks: 10,
     modelAnswer: '',
@@ -76,9 +78,9 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
     
     try {
       const result = await evaluateAnswer(
-        question.text!,
-        question.totalMarks || 10,
-        question.modelAnswer!,
+        question.text,
+        question.totalMarks,
+        question.modelAnswer,
         studentAnswer
       );
       
@@ -98,8 +100,30 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
         <div className="space-y-5">
           <h2 className="font-semibold text-xl text-app-blue-900 mb-2 flex items-center">
             <ClipboardCheckIcon size={20} className="mr-2 text-app-teal-600" />
-            Evaluation Details
+            Essay Question Evaluation
           </h2>
+          
+          <div className="flex justify-start items-center mb-4">
+            <div className="flex items-center space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onQuestionTypeChange('mcq')}
+              >
+                MCQ Question
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="bg-app-teal-500 text-white hover:bg-app-teal-600"
+                onClick={() => onQuestionTypeChange('essay')}
+              >
+                Essay Question
+              </Button>
+            </div>
+          </div>
           
           <Collapsible open={showQuestionPaper} onOpenChange={setShowQuestionPaper} className="transition-all duration-300">
             <div className="flex justify-between items-center mb-2">
@@ -121,7 +145,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
                 <Textarea
                   id="question-paper"
                   name="questionPaper"
-                  value={question.questionPaper || ''}
+                  value={question.questionPaper}
                   onChange={handleInputChange}
                   placeholder="Enter the question paper text..."
                   className="min-h-[80px] focus:border-app-teal-300"

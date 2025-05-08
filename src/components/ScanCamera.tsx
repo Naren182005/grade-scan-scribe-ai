@@ -4,13 +4,19 @@ import { Camera, CameraOff, ScanText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
-import { extractTextFromImage } from "@/utils/evaluationService";
+import { extractTextFromImage } from "@/utils/evaluationServices";
 
 interface ScanCameraProps {
   onCapture: (text: string, imageUrl: string) => void;
+  title?: string;
+  description?: string;
 }
 
-const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
+const ScanCamera: React.FC<ScanCameraProps> = ({ 
+  onCapture, 
+  title = "Scan Answer Sheet",
+  description = "Position the answer sheet within the frame and capture a clear image"
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -95,7 +101,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
       setIsProcessing(true);
       const extractedText = await extractTextFromImage(imageUrl);
       onCapture(extractedText, imageUrl);
-      toast.success("Answer sheet scanned successfully!");
+      toast.success(`${title} scanned successfully!`);
     } catch (error) {
       console.error("Error processing image:", error);
       toast.error("Error processing image");
@@ -118,10 +124,10 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
       <div className="p-4 bg-app-blue-50">
         <div className="flex items-center gap-2 mb-2">
           <ScanText className="h-5 w-5 text-app-teal-600" />
-          <h2 className="font-semibold text-app-blue-900">Scan Answer Sheet</h2>
+          <h2 className="font-semibold text-app-blue-900">{title}</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          Position the answer sheet within the frame and capture a clear image
+          {description}
         </p>
         
         <div className="relative aspect-[4/3] bg-black rounded-lg overflow-hidden shadow-inner">
@@ -142,7 +148,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onCapture }) => {
           ) : isCaptured ? (
             <img 
               src={capturedImageUrl} 
-              alt="Captured answer sheet" 
+              alt="Captured image" 
               className="w-full h-full object-contain"
             />
           ) : (
